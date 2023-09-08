@@ -77,7 +77,7 @@ def do_everything(name_list_in):
     if 'qr_sheet' not in st.session_state:
         st.session_state['qr_sheet'] = None
 
-    member_list = [k[0] + " " + k[1] for k in name_list_in]
+    member_list = [k[0] + " " + k[1] + " - " + k[2] for k in name_list_in]
     load_name_list_and_create_qrpng(member_list)
     create_qr_sheet_to_print()
     st.session_state['success'] = 'bestand klaar voor download'
