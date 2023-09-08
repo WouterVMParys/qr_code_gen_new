@@ -9,13 +9,24 @@ class StreamlitEngine:
     def __init__(self):
         if 'nieuwe_namen' not in st.session_state:
             st.session_state['nieuwe_namen'] = []
+        if 'qr_file_names' not in st.session_state:
+            st.session_state['qr_file_names'] = []
+        if 'success' not in st.session_state:
+            st.session_state['success'] = "Bestand nog niet aangemaakt"
 
         self.add_new_member()
         st.markdown('#')
         self.create_project_overview()
         st.markdown('#')
-        st.button("Maak qr codes", on_click=do_everything, args=(st.session_state['nieuwe_namen'],)
-)
+        st.button("Maak qr codes", on_click=do_everything, args=(st.session_state['nieuwe_namen'],))
+        st.write(st.session_state['success'])
+        with open('qr_sheets/qr_document_from_streamlit_1.png', "rb") as file:
+            btn = st.download_button(
+                label="Download image",
+                data=file,
+                file_name="flower.png",
+                mime="image/png"
+            )
 
     def add_new_member(self):
         a, b, c, d = st.columns([3, 3, 3, 2])
@@ -31,18 +42,23 @@ class StreamlitEngine:
 
     def add_name_to_list(self, vn, an, gr):
         st.session_state['nieuwe_namen'].append([vn, an, gr])
+        st.session_state['success'] = "Bestand nog niet aangemaakt"
 
     def create_project_overview(self):
         with st.expander("Huidig overzicht"):
-            a, b, c, d, e = st.columns([5, 7, 2, 2, 3])
+            a, b, c, d, e = st.columns([1, 4, 4, 3, 2])
             with a:
-                st.write(':blue[**Voornaam**]')
+                st.write(':blue[**#**]')
             with b:
-                st.write(':blue[**Achternaam**]')
+                st.write(':blue[**Voornaam**]')
             with c:
+                st.write(':blue[**Achternaam**]')
+            with d:
                 st.write(':blue[**Groep**]')
             for i, k in enumerate(st.session_state['nieuwe_namen']):
-                a, b, c, d = st.columns([5, 5, 4, 2])
+                num, a, b, c, d = st.columns([1, 4, 4, 3, 2])
+                with num:
+                    st.write(i+1)
                 with a:
                     st.write(k[0])
                 with b:
@@ -54,6 +70,7 @@ class StreamlitEngine:
 
     def delete_name_from_list(self, ind):
         st.session_state['nieuwe_namen'].pop(ind)
+        st.session_state['success'] = "Bestand nog niet aangemaakt"
 
 
 def do_everything(name_list_in):
@@ -63,19 +80,7 @@ def do_everything(name_list_in):
     member_list = [k[0] + " " + k[1] for k in name_list_in]
     load_name_list_and_create_qrpng(member_list)
     create_qr_sheet_to_print()
-
-
-def create_png_for_name(name_in):
-    qr = qrcode.QRCode(
-        version=1,
-        box_size=20,
-        border=4,
-    )
-    qr.add_data(name_in)
-    qr.make(fit=True)
-
-    img = qr.make_image(fill_color="darkblue", back_color="white")
-    img.save("qr_codes/" + name_in + ".png")
+    st.session_state['success'] = 'bestand klaar voor download'
 
 
 def load_name_list_and_create_qrpng(name_list_in):
@@ -131,6 +136,12 @@ def create_png_qr_with_logo(name_in):
     QRimg.save("qr_codes/" + name_in + ".png")
 
     print('QR code generated for ' + name_in + "!")
+    file_str = name_in + ".png"
+    if file_str not in st.session_state['qr_file_names']:
+        print("ADDED {} to session state".format(file_str))
+        st.session_state['qr_file_names'].append(file_str)
+    else:
+        print("{} already session state".format(file_str))
 
 
 def black_bg_square(x_am, y_am, width, height, border):
@@ -143,6 +154,8 @@ def black_bg_square(x_am, y_am, width, height, border):
 def create_qr_sheet_to_print():
     max_x_amount = 4
     max_y_amount = 3
+    if len(st.session_state['qr_file_names']) > 12:
+        max_y_amount = 6
     current_x = 0
     current_y = 0
     border = 40
@@ -154,11 +167,13 @@ def create_qr_sheet_to_print():
     paper_layer = black_bg_square(max_x_amount, max_y_amount, x_step, y_step, border)
     full_cards_paper = paper_layer.copy()
     path_to_qr_files = 'qr_codes/'
-    qr_list = os.listdir(path_to_qr_files)
-    qr_list.sort()
+    # qr_list = os.listdir(path_to_qr_files)
+    # qr_list.sort()
     page_number = 1
     counter = 0
-    for qr_file in qr_list:
+    # new_qr_list = [f_name for f_name in qr_list if f_name in st.session_state['qr_file_names']]
+    print("QR FILE NQMES IN ST:", st.session_state['qr_file_names'])
+    for qr_file in st.session_state['qr_file_names']:
         if counter > 23:
             full_cards_paper.save('qr_sheets/qr_document_from_streamlit_' + str(page_number) + '.png', quality=95)
             page_number += 1
