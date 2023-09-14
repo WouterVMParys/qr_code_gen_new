@@ -35,7 +35,7 @@ class StreamlitEngine:
         with b:
             achternaam = st.text_input('Achternaam','')
         with c:
-            groep = st.selectbox('Groep', ('U6', 'U8', 'U14', 'Jun&Sen', 'Recr', 'Wedstrpl.'))
+            groep = st.selectbox('Groep', ('U6', 'U8', 'U14', 'Jun&Sen', 'Recr', 'Wedstrplg'))
         with d:
             st.write('#')
         st.button('voeg toe', on_click=self.add_name_to_list, args=(voornaam, achternaam, groep))
