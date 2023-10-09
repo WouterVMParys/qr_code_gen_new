@@ -103,7 +103,7 @@ def create_png_qr_with_logo(name_in):
     # adjust image size
     wpercent = (basewidth / float(logo.size[0]))
     hsize = int((float(logo.size[1]) * float(wpercent)))
-    logo = logo.resize((basewidth, hsize), Image.ANTIALIAS)
+    logo = logo.resize((basewidth, hsize), PIL.Image.LANCZOS)
     QRcode = qrcode.QRCode(
         error_correction=qrcode.constants.ERROR_CORRECT_H
     )
